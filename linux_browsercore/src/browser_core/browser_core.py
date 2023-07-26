@@ -8,6 +8,7 @@ import logging
 import os
 import struct
 import sys
+import uuid
 
 from urllib.parse import unquote
 
@@ -19,6 +20,8 @@ obj = bus.get_object("com.microsoft.identity.broker1", "/com/microsoft/identity/
 iface = dbus.Interface(obj, dbus_interface="com.microsoft.identity.Broker1")
 
 EXTENSION_ID = "linux-windows-login@com.elsevier.varesp"
+# default client is "Microsoft Edge"
+DEFAULT_CLIENT_ID = "ecd6b820-32c2-49b6-98a6-444530e5a77a"
 
 
 def parse_args() -> argparse.Namespace:
@@ -81,18 +84,17 @@ STDOUT_BUFFER = sys.stdout.buffer
 DEFAULT_LOG_LEVEL = logging.INFO
 LOG_FORMAT = "[%(levelname)s] %(asctime)s | %(message)s"
 
+
 def debug_main():
-    """A function wich launches `main` with debug options
-    """
-    logfile = os.path.join(
-        os.path.expanduser("~"), "browsercore.log"
-    )
+    """A function wich launches `main` with debug options"""
+    logfile = os.path.join(os.path.expanduser("~"), "browsercore.log")
     sys.argv.extend(("--logfile", logfile, "--verbose"))
     main()
 
+
 def main():
     """Main function to receive native message and respond with PRT cookie"""
-    # pylint: disable=too-many-locals,too-many-statements
+    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
     args = parse_args()
 
     if args.install:
@@ -144,10 +146,14 @@ def main():
                 params[key] = value
             logging.debug("URI params '%s'", json.dumps(params))
 
-            client_id = params["client_id"]
-            corr_id = params["client-request-id"]
-            redirect_uri = params["redirect_uri"]
-            scopes = params["scope"].split(" ")
+            client_id = params.get("client_id", DEFAULT_CLIENT_ID)
+            client_id = DEFAULT_CLIENT_ID
+            corr_id = params.get("client-request-id", str(uuid.uuid4()))
+            redirect_uri = params.get("redirect_uri")
+            if "scope" not in params:
+                scopes = []
+            else:
+                scopes = params["scope"].split(" ")
 
             # retrieve accounts available on the host
             request_json = json.dumps({"clientId": client_id, "redirectUri": redirect_uri})
