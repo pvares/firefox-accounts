@@ -12,6 +12,14 @@ By abusing a now deprecated [Firefox version](https://addons.mozilla.org/en-US/f
 2. Install the python wheel "user wide" `pip install linux_browsercore-0.0.1-py3-none-any.whl`
 3. Run `browsercore --install` to setup the Native Messaging Hosts file. Check `~/.mozilla/native-messaging-hosts/` for it
 
+## Debugging
+
+If it's not working, don't be shocked. This is held together with paperclips and bits of twine. You can modify `~/.mozilla/native-messaging-hosts/com.microsoft.browsercore.json` to set the path to `browsercore-debug` and check `~/browsercore.log` to potentially get some insight. You can also check the browser console to see if there are messages similar to this:
+
+```BSSO Telemetry: {"result":"Reload","error":null,"type":"ChromeSsoTelemetry","data":{"extension.id":"linux-windows-login@com.elsevier.varesp"},"traces":["BrowserSSO Initialized","Creating ChromeBrowserCore provider","Sending message for method CreateProviderAsync","Received message for method CreateProviderAsync","Using Chrome extension with id linux-windows-login@com.elsevier.varesp","Pulling SSO cookies","Sending message for method GetCookies","Received message for method Response","SSO cookie detected. Refreshing page."]}```
+
+This can help determine if there are any errors
+
 ## How it works
 
 ### Frontend

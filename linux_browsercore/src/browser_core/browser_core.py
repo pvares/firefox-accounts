@@ -81,6 +81,14 @@ STDOUT_BUFFER = sys.stdout.buffer
 DEFAULT_LOG_LEVEL = logging.INFO
 LOG_FORMAT = "[%(levelname)s] %(asctime)s | %(message)s"
 
+def debug_main():
+    """A function wich launches `main` with debug options
+    """
+    logfile = os.path.join(
+        os.path.expanduser("~"), "browsercore.log"
+    )
+    sys.argv.extend(("--logfile", logfile, "--verbose"))
+    main()
 
 def main():
     """Main function to receive native message and respond with PRT cookie"""
