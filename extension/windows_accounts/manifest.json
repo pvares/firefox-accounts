@@ -1,0 +1,45 @@
+{
+    "manifest_version": 2,
+    "name": "Windows 10 Accounts",
+    "description": "Sign in to supported websites with accounts on Windows 10",
+    "version": "1.0.2.3",
+    "browser_action": {
+        "default_icon": "windows16.png",
+        "default_title": "Sign in to websites with accounts on Windows 10"
+    },
+    "icons": {
+        "16": "windows16.png",
+        "48": "windows48.png",
+        "128": "windows128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://login.microsoftonline.com/*",
+                "https://federation.reedelsevier.com/*"
+            ],
+            "all_frames": true,
+            "js": [
+                "message_receiver.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "permissions": [
+        "webRequest",
+        "webRequestBlocking",
+        "nativeMessaging",
+        "https://login.microsoftonline.com/*",
+        "https://federation.reedelsevier.com/*"
+    ],
+    "applications": {
+        "gecko": {
+            "id": "linux-windows-login@com.elsevier.varesp"
+        }
+    }
+}
