@@ -1,4 +1,4 @@
-# Edging Firefox 😉
+# Linux Firefox Browsercore
 
 On Windows various Microsoft sites utilize the program `BrowserCore.exe` to retrieve a PRT Cookie to enable seemless authentication with the signed in Windows Account. In order to communicate with this .exe MS uses the Chrome extension [Windows Accounts](https://chrome.google.com/webstore/detail/windows-accounts/ppnbnpeolgkicgegkbkbjmhlideopiji) which communicates via `NativeHostMessaging` to `BrowserCore.exe`.
 
