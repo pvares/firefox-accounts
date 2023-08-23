@@ -157,22 +157,25 @@ def main():
                 params[key] = value
             logging.debug("URI params '%s'", json.dumps(params))
 
-            if "SAMLRequest" in params:
-                logging.error("Not responding to SAML request")
-                break
-
             client_id = params.get("client_id", DEFAULT_CLIENT_ID)
             client_id = DEFAULT_CLIENT_ID
             corr_id = params.get("client-request-id", str(uuid.uuid4()))
-            redirect_uri = params.get("redirect_uri")
+            # sometimes there is no redirect URI. in that case we simply provide the uri that made the request
+            redirect_uri = params.get("redirect_uri", uri)
             if "scope" not in params:
                 scopes = []
             else:
                 scopes = params["scope"].split(" ")
 
             # retrieve accounts available on the host
-            request_json = json.dumps({"clientId": client_id, "redirectUri": redirect_uri})
+            request = {"clientId": client_id, "redirectUri": redirect_uri}
+            request_json = json.dumps(request)
+            # log the account request
+            logging.debug(request_json)
+
             resp = json.loads(iface.getAccounts("0.0", corr_id, request_json))
+            # log the account response
+            logging.debug(json.dumps(resp))
             # let's just assume it's the only account here... this _could_ be more than 1, but i'm not handling that right now
             if not resp["accounts"]:
                 logging.error("No accounts found")
