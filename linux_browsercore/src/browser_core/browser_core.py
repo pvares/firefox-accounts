@@ -14,6 +14,8 @@ from urllib.parse import unquote
 
 import dbus
 
+from . import __version__
+
 bus = dbus.SessionBus()
 
 obj = bus.get_object("com.microsoft.identity.broker1", "/com/microsoft/identity/broker1")
@@ -51,6 +53,11 @@ def parse_args() -> argparse.Namespace:
         "--install-application-path",
         help=f"The path where this executable to be launched by Firefox is located. Default {sys.argv[0]}",
         default=sys.argv[0],
+    )
+    parser.add_argument(
+        "--version",
+        help=f"Print the version and exit",
+        action="store_true",
     )
 
     # NativeMessagingHosts launches with some arguments (messaging.hosts.file.json, extension@extension-id)
@@ -97,9 +104,13 @@ def main():
     # pylint: disable=too-many-locals,too-many-statements,too-many-branches
     args = parse_args()
 
+    if args.version:
+        print(__version__)
+        sys.exit(0)
+
     if args.install:
         install_native_hosts(args.install_application_path)
-        return
+        sys.exit(0)
 
     if args.verbose:
         log_level = logging.DEBUG
@@ -146,6 +157,10 @@ def main():
                 params[key] = value
             logging.debug("URI params '%s'", json.dumps(params))
 
+            if "SAMLRequest" in params:
+                logging.error("Not responding to SAML request")
+                break
+
             client_id = params.get("client_id", DEFAULT_CLIENT_ID)
             client_id = DEFAULT_CLIENT_ID
             corr_id = params.get("client-request-id", str(uuid.uuid4()))
@@ -159,6 +174,9 @@ def main():
             request_json = json.dumps({"clientId": client_id, "redirectUri": redirect_uri})
             resp = json.loads(iface.getAccounts("0.0", corr_id, request_json))
             # let's just assume it's the only account here... this _could_ be more than 1, but i'm not handling that right now
+            if not resp["accounts"]:
+                logging.error("No accounts found")
+                break
             account = resp["accounts"][0]
 
             ##acquirePrtSsoCookie
